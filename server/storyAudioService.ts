@@ -1055,7 +1055,11 @@ export async function runMissingStoryAudioBackfill(opts: {
           } catch (err) {
             const diag = summarizeSafeTtsError(err);
             storyAudioBackfillStatus.lastError = `${sceneKey} [${activeModel}]: ${diag.summary}`;
-            console.error(`[StoryAudioBackfill] Error on ${sceneKey} [${activeModel}]: ${diag.summary}`);
+            if (diag.isQuota429) {
+              console.warn(`[StoryAudioBackfill] Quota notice on ${sceneKey} [${activeModel}]: ${diag.summary}`);
+            } else {
+              console.error(`[StoryAudioBackfill] Error on ${sceneKey} [${activeModel}]: ${diag.summary}`);
+            }
 
             // Stop immediately on permanent config/model errors
             if (/API_KEY_INVALID|PERMISSION_DENIED|NOT_FOUND|\b403\b|\b404\b/i.test(diag.summary)) {
